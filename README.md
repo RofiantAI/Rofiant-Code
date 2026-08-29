@@ -1,7 +1,7 @@
 <h1 align="center">Rofiant Code</h1>
 
 <p align="center">
-  <img src="public/logo.png" alt="Rofiant Code" width="180">
+  <img src="preview.png" alt="Rofiant Code" width="700">
 </p>
 
 <p align="center"><strong>Your terminal-native AI coding agent</strong></p>

@@ -25,6 +25,7 @@ import { Permission } from "./Permission"
 import { WorkingIndicator } from "./WorkingIndicator"
 import { ModelSelector } from "./ModelSelector"
 import { ProviderSelector } from "./ProviderSelector"
+import { LoginRequiredModal } from "./LoginRequiredModal"
 import { Splash } from "./Splash"
 import { slashCommands } from "./commands"
 import { SUBAGENTS, type SubagentDef } from "./mentions"
@@ -117,6 +118,7 @@ export function App(props: AppProps) {
   )
   const [modelPicker, setModelPicker] = createSignal<FreeModelInfo[] | null>(null)
   const [providerPicker, setProviderPicker] = createSignal(false)
+  const [loginRequired, setLoginRequired] = createSignal(false)
   const [skipPermissions, setSkipPermissions] = createSignal(props.dangerouslySkipPermissions)
 
   let session = props.session
@@ -293,8 +295,7 @@ export function App(props: AppProps) {
     }
 
     if (!props.config.apiKey) {
-      info("Sign in to a provider before chatting.")
-      setProviderPicker(true)
+      setLoginRequired(true)
       return
     }
 
@@ -679,7 +680,7 @@ export function App(props: AppProps) {
     const name = key.name.toLowerCase()
 
     // Own global shortcuts here: chat scroll/focus can keep child textarea handlers from receiving them.
-    if (key.ctrl && name === "p" && !busy() && !pending() && !modelPicker() && !settingsOpen() && !providerPicker()) {
+    if (key.ctrl && name === "p" && !busy() && !pending() && !modelPicker() && !settingsOpen() && !providerPicker() && !loginRequired()) {
       key.preventDefault()
       setSettingsOpen(true)
       return
@@ -693,6 +694,7 @@ export function App(props: AppProps) {
       }
       if (modelPicker()) setModelPicker(null)
       if (providerPicker()) setProviderPicker(false)
+      if (loginRequired()) setLoginRequired(false)
       if (busy()) {
         currentAbort?.abort()
         ctrlCArmed = false
@@ -709,7 +711,7 @@ export function App(props: AppProps) {
       return
     }
 
-    if (pending() || modelPicker() || settingsOpen() || providerPicker()) return // that component owns the keyboard while it's open
+    if (pending() || modelPicker() || settingsOpen() || providerPicker() || loginRequired()) return // that component owns the keyboard while it's open
 
     if (key.ctrl && name === "l") {
       setEntries([])
@@ -734,7 +736,7 @@ export function App(props: AppProps) {
             mode={mode()}
             onSubmit={handleSubmit}
             history={inputHistory()}
-            disabled={busy() || pending() !== null || settingsOpen() || modelPicker() !== null || providerPicker()}
+            disabled={busy() || pending() !== null || settingsOpen() || modelPicker() !== null || providerPicker() || loginRequired()}
             onCommandPaletteOpenChange={setSuggestionsOpen}
             onOpenCommandPalette={() => setSettingsOpen(true)}
             paletteOpen={suggestionsOpen()}
@@ -777,7 +779,7 @@ export function App(props: AppProps) {
         <Input
           onSubmit={handleSubmit}
           history={inputHistory()}
-          disabled={busy() || pending() !== null || modelPicker() !== null || settingsOpen() || providerPicker()}
+          disabled={busy() || pending() !== null || modelPicker() !== null || settingsOpen() || providerPicker() || loginRequired()}
           onCommandPaletteOpenChange={setSuggestionsOpen}
           onOpenCommandPalette={() => setSettingsOpen(true)}
           skills={props.skills}
@@ -807,6 +809,9 @@ export function App(props: AppProps) {
             onCancel={() => setModelPicker(null)}
           />
         )}
+      </Show>
+      <Show when={loginRequired()}>
+        <LoginRequiredModal onClose={() => setLoginRequired(false)} />
       </Show>
       <Show when={providerPicker()}>
         <ProviderSelector
