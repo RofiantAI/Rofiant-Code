@@ -5,6 +5,17 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+function Write-Step([string]$Message) {
+  Write-Host "  > " -ForegroundColor Magenta -NoNewline
+  Write-Host $Message
+}
+
+Write-Host ""
+Write-Host "  ◆ " -ForegroundColor Magenta -NoNewline
+Write-Host "Rofiant Code" -ForegroundColor White
+Write-Host "    Terminal AI coding agent" -ForegroundColor DarkGray
+Write-Host ""
+
 if (-not (Get-Command bun -ErrorAction SilentlyContinue)) {
   throw "Rofiant Code requires Bun: https://bun.sh/docs/installation"
 }
@@ -17,6 +28,7 @@ $StageDir = Join-Path ([IO.Path]::GetTempPath()) ("rofiant-install." + [guid]::N
 $BackupRoot = "$InstallRoot.previous"
 
 try {
+  Write-Step "Downloading latest version"
   New-Item -ItemType Directory -Path $StageDir -Force | Out-Null
   $ArchiveZip = Join-Path ([IO.Path]::GetTempPath()) ("rofiant-src." + [guid]::NewGuid().ToString("N") + ".zip")
   Invoke-WebRequest -Uri $RepoArchive -OutFile $ArchiveZip
@@ -27,14 +39,19 @@ try {
   Copy-Item (Join-Path $SrcRoot.FullName "*") -Destination $StageDir -Recurse
   Remove-Item $ExtractDir -Recurse -Force
 
+  Write-Step "Installing dependencies"
   Push-Location $StageDir
   try {
-    & bun install --production --frozen-lockfile
-    if ($LASTEXITCODE -ne 0) { throw "bun install failed with exit code $LASTEXITCODE" }
+    $BunOutput = & bun install --production --frozen-lockfile 2>&1
+    if ($LASTEXITCODE -ne 0) {
+      $BunOutput | ForEach-Object { Write-Host $_ }
+      throw "bun install failed with exit code $LASTEXITCODE"
+    }
   } finally {
     Pop-Location
   }
 
+  Write-Step "Creating command"
   $Preload = Join-Path $InstallRoot "node_modules\@opentui\solid\scripts\preload.js"
   $Entry = Join-Path $InstallRoot "src\index.ts"
   @("@echo off", "bun --preload `"$Preload`" `"$Entry`" %*") |
@@ -59,10 +76,15 @@ try {
     $NewPath = if ($UserPath) { "$($UserPath.TrimEnd(';'));$BinDir" } else { $BinDir }
     [Environment]::SetEnvironmentVariable("Path", $NewPath, "User")
     $env:Path = "$env:Path;$BinDir"
-    Write-Host "Added $BinDir to user PATH. Open a new terminal before running rofiant."
+    Write-Host "  > Added command directory to user PATH" -ForegroundColor Magenta
   }
 
-  Write-Host "Installed Rofiant Code: $(Join-Path $BinDir 'rofiant.cmd')"
+  Write-Host ""
+  Write-Host "  ✓ Installed" -ForegroundColor Green
+  Write-Host "    $(Join-Path $BinDir 'rofiant.cmd')" -ForegroundColor DarkGray
+  Write-Host ""
+  Write-Host "    Run rofiant from any project."
+  Write-Host ""
 } finally {
   if (Test-Path $StageDir) { Remove-Item $StageDir -Recurse -Force }
 }

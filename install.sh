@@ -1,8 +1,26 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ -t 1 ]]; then
+  bold=$'\033[1m'
+  purple=$'\033[35m'
+  green=$'\033[32m'
+  yellow=$'\033[33m'
+  dim=$'\033[2m'
+  reset=$'\033[0m'
+else
+  bold="" purple="" green="" yellow="" dim="" reset=""
+fi
+
+step() {
+  printf '  %s›%s %s\n' "$purple" "$reset" "$1"
+}
+
+printf '\n  %s◆%s %sRofiant Code%s\n' "$purple" "$reset" "$bold" "$reset"
+printf '    %sTerminal AI coding agent%s\n\n' "$dim" "$reset"
+
 if ! command -v bun >/dev/null 2>&1; then
-  echo "Rofiant Code requires Bun: https://bun.sh/docs/installation" >&2
+  printf '  %s✗ Bun is required.%s Install it from https://bun.sh/docs/installation\n' "$yellow" "$reset" >&2
   exit 1
 fi
 
@@ -18,9 +36,12 @@ cleanup() {
 }
 trap cleanup EXIT
 
+step "Downloading latest version"
 curl -fsSL "$repo_archive" | tar -xz -C "$stage_dir" --strip-components=1
-(cd "$stage_dir" && bun install --production --frozen-lockfile)
+step "Installing dependencies"
+(cd "$stage_dir" && bun install --production --frozen-lockfile >/dev/null)
 
+step "Creating command"
 printf '#!/usr/bin/env bash\nexec bun --preload %q %q "$@"\n' \
   "$install_root/node_modules/@opentui/solid/scripts/preload.js" \
   "$install_root/src/index.ts" > "$launcher_tmp"
@@ -51,18 +72,19 @@ rm -rf -- "$backup_root"
 mv "$install_root/rofiant-launcher" "$bin_dir/rofiant"
 
 if [[ "$(uname -s)" == "Linux" ]]; then
+  step "Adding application launcher"
   applications_dir="${data_base}/applications"
   mkdir -p "$applications_dir"
   mv "$install_root/rofiant-code.desktop" "$applications_dir/rofiant-code.desktop"
   if command -v update-desktop-database >/dev/null 2>&1; then
     update-desktop-database "$applications_dir" >/dev/null 2>&1 || true
   fi
-  echo "Added Rofiant Code to the application launcher."
 fi
 
-echo "Installed Rofiant Code: $bin_dir/rofiant"
+printf '\n  %s✓ Installed%s\n' "$green" "$reset"
+printf '    %s%s%s\n' "$dim" "$bin_dir/rofiant" "$reset"
 if [[ ":$PATH:" != *":$bin_dir:"* ]]; then
-  echo "Add $bin_dir to PATH, then run: rofiant"
+  printf '\n  %s! Add %s to PATH, then run: rofiant%s\n\n' "$yellow" "$bin_dir" "$reset"
 else
-  echo "Run: rofiant"
+  printf '\n    Run %srofiant%s from any project.\n\n' "$bold" "$reset"
 fi
