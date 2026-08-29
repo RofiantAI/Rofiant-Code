@@ -1,0 +1,32 @@
+{
+  "name": "rofiant-code",
+  "version": "0.1.0",
+  "description": "Terminal AI coding agent with reviewable tool permissions.",
+  "private": true,
+  "license": "GPL-3.0-only",
+  "author": "RofiantAI",
+  "repository": "https://github.com/RofiantAI/Rofiant-Code",
+  "bugs": "https://github.com/RofiantAI/Rofiant-Code/issues",
+  "homepage": "https://github.com/RofiantAI/Rofiant-Code#readme",
+  "type": "module",
+  "bin": {
+    "rofiant": "./src/index.ts"
+  },
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "dev": "bun run src/index.ts",
+    "test": "bun test",
+    "check": "bun run typecheck && bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@opentui/core": "^0.5.9",
+    "@opentui/solid": "^0.5.9",
+    "solid-js": "^1.9.15",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.7.0"
+  }
+}
