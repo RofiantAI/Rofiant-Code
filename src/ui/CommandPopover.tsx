@@ -39,7 +39,7 @@ export function CommandPopover(props: CommandPopoverProps) {
       paddingBottom={1}
       marginBottom={1}
     >
-      <scrollbox ref={scrollRef} maxHeight={18} scrollbarOptions={{ visible: false }}>
+      <scrollbox ref={scrollRef} height={Math.min(props.matches.length, 18)} scrollbarOptions={{ visible: false }}>
         <For each={props.matches}>
           {(item, i) => {
             const selected = () => i() === props.selectedIndex

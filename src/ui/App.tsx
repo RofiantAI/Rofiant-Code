@@ -740,6 +740,7 @@ export function App(props: AppProps) {
             onCommandPaletteOpenChange={setSuggestionsOpen}
             onOpenCommandPalette={() => setSettingsOpen(true)}
             paletteOpen={suggestionsOpen()}
+            terminalHeight={dimensions().height}
             visualMode={appSettings.visualMode}
             skills={props.skills}
           />

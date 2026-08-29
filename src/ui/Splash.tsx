@@ -16,7 +16,13 @@ export interface SplashProps {
   skills?: Skill[]
   visualMode: "vivid" | "minimal"
   paletteOpen?: boolean
+  terminalHeight?: number
 }
+
+// ponytail: logo (~9 rows) + its margin + the tip line only get in the way once the palette's
+// own rows (up to 18) plus input/hint/padding no longer both fit — this cutoff is an approximate
+// budget for that, not a measured one. Tighten it if real terminals still overlap near the edge.
+const SHORT_TERMINAL_ROWS = 40
 
 // Fixed scatter, not Math.random() — a stable background shouldn't reshuffle on every render.
 // The centered content column is vertically centered and can run tall (block-font logo +
@@ -91,6 +97,7 @@ const TIPS = [
 export function Splash(props: SplashProps) {
   // Picked once per mount, not per render — a tip that changed on every keystroke would be noise, not a tip.
   const tip = TIPS[Math.floor(Math.random() * TIPS.length)]
+  const hideForPalette = () => props.paletteOpen && (props.terminalHeight ?? Infinity) < SHORT_TERMINAL_ROWS
 
   const [letterColors, setLetterColors] = createSignal<string[]>(LOGO_BASE_COLORS)
   const wave = { t: 0 }
@@ -135,7 +142,7 @@ export function Splash(props: SplashProps) {
       </Show>
 
       <box flexGrow={1} flexDirection="column" alignItems="center" justifyContent="center">
-        <Show when={!props.paletteOpen}>
+        <Show when={!hideForPalette()}>
           <Show
             when={props.visualMode === "vivid"}
             fallback={<text fg={theme.logo}>ROFIANT CODE</text>}
@@ -173,7 +180,7 @@ export function Splash(props: SplashProps) {
           </box>
         </box>
 
-        <Show when={!props.paletteOpen}>
+        <Show when={!hideForPalette()}>
           <box marginTop={2} flexDirection="row">
             <text fg={theme.logo}>● Tip </text>
             <text fg={theme.dim}>{tip}</text>
