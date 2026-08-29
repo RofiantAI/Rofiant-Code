@@ -737,13 +737,14 @@ export function App(props: AppProps) {
             disabled={busy() || pending() !== null || settingsOpen() || modelPicker() !== null || providerPicker()}
             onCommandPaletteOpenChange={setSuggestionsOpen}
             onOpenCommandPalette={() => setSettingsOpen(true)}
+            paletteOpen={suggestionsOpen()}
             visualMode={appSettings.visualMode}
             skills={props.skills}
           />
         }
       >
         <box flexShrink={0} flexDirection="row" alignItems="center" paddingLeft={1} paddingRight={1} marginBottom={1} gap={1}>
-          <box width={8} height={4} flexShrink={0} overflow="hidden">
+          <box width={12} height={6} flexShrink={0} overflow="hidden">
             <image source={LOGO_PATH} width="100%" height="100%" fit="fit" protocol="blocks" />
           </box>
           <box flexDirection="column">

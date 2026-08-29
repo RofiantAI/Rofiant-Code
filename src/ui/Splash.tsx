@@ -15,6 +15,7 @@ export interface SplashProps {
   onOpenCommandPalette?: () => void
   skills?: Skill[]
   visualMode: "vivid" | "minimal"
+  paletteOpen?: boolean
 }
 
 // Fixed scatter, not Math.random() — a stable background shouldn't reshuffle on every render.
@@ -134,22 +135,24 @@ export function Splash(props: SplashProps) {
       </Show>
 
       <box flexGrow={1} flexDirection="column" alignItems="center" justifyContent="center">
-        <Show
-          when={props.visualMode === "vivid"}
-          fallback={<text fg={theme.logo}>ROFIANT CODE</text>}
-        >
-          <box flexDirection="row">
-            <For each={LOGO_LETTERS}>
-              {(letter, i) => (
-                <>
-                  <Show when={letter.gapBefore > 0}>
-                    <box width={letter.gapBefore} />
-                  </Show>
-                  <ascii_font text={letter.char} font="block" color={letterColors()[i()]} buffered={false} />
-                </>
-              )}
-            </For>
-          </box>
+        <Show when={!props.paletteOpen}>
+          <Show
+            when={props.visualMode === "vivid"}
+            fallback={<text fg={theme.logo}>ROFIANT CODE</text>}
+          >
+            <box flexDirection="row">
+              <For each={LOGO_LETTERS}>
+                {(letter, i) => (
+                  <>
+                    <Show when={letter.gapBefore > 0}>
+                      <box width={letter.gapBefore} />
+                    </Show>
+                    <ascii_font text={letter.char} font="block" color={letterColors()[i()]} buffered={false} />
+                  </>
+                )}
+              </For>
+            </box>
+          </Show>
         </Show>
 
         <box width={78} marginTop={2} flexDirection="column">
@@ -170,10 +173,12 @@ export function Splash(props: SplashProps) {
           </box>
         </box>
 
-        <box marginTop={2} flexDirection="row">
-          <text fg={theme.logo}>● Tip </text>
-          <text fg={theme.dim}>{tip}</text>
-        </box>
+        <Show when={!props.paletteOpen}>
+          <box marginTop={2} flexDirection="row">
+            <text fg={theme.logo}>● Tip </text>
+            <text fg={theme.dim}>{tip}</text>
+          </box>
+        </Show>
       </box>
 
       <box position="absolute" bottom="1%" right="2%">
