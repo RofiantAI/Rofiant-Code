@@ -25,17 +25,13 @@ By default, built-in file writes and shell commands not classified as read-only 
 ### macOS / Linux
 
 ```bash
-git clone https://github.com/RofiantAI/Rofiant-Code.git
-cd Rofiant-Code
-./install.sh
+curl -fsSL https://raw.githubusercontent.com/RofiantAI/Rofiant-Code/main/install.sh | bash
 ```
 
 ### Windows PowerShell
 
 ```powershell
-git clone https://github.com/RofiantAI/Rofiant-Code.git
-cd Rofiant-Code
-.\install.ps1
+irm https://raw.githubusercontent.com/RofiantAI/Rofiant-Code/main/install.ps1 | iex
 ```
 
 Run Rofiant Code from the project you want to work on:

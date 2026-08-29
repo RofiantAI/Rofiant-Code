@@ -9,7 +9,7 @@ if (-not (Get-Command bun -ErrorAction SilentlyContinue)) {
   throw "Rofiant Code requires Bun: https://bun.sh/docs/installation"
 }
 
-$RepoArchive = if ($env:ROFIANT_REPO_ARCHIVE) { $env:ROFIANT_REPO_ARCHIVE } else { "https://github.com/RofiantAI/RofiantCode/archive/refs/heads/main.zip" }
+$RepoArchive = if ($env:ROFIANT_REPO_ARCHIVE) { $env:ROFIANT_REPO_ARCHIVE } else { "https://github.com/RofiantAI/Rofiant-Code/archive/refs/heads/main.zip" }
 $DataBase = if ($env:LOCALAPPDATA) { $env:LOCALAPPDATA } else { Join-Path $HOME "AppData\Local" }
 $InstallRoot = Join-Path $DataBase "rofiant\app"
 if (-not $BinDir) { $BinDir = Join-Path $DataBase "Programs\Rofiant\bin" }

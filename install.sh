@@ -6,7 +6,7 @@ if ! command -v bun >/dev/null 2>&1; then
   exit 1
 fi
 
-repo_archive="${ROFIANT_REPO_ARCHIVE:-https://github.com/RofiantAI/RofiantCode/archive/refs/heads/main.tar.gz}"
+repo_archive="${ROFIANT_REPO_ARCHIVE:-https://github.com/RofiantAI/Rofiant-Code/archive/refs/heads/main.tar.gz}"
 data_base="${XDG_DATA_HOME:-$HOME/.local/share}"
 install_root="${data_base}/rofiant/app"
 bin_dir="${ROFIANT_BIN_DIR:-$HOME/.local/bin}"
