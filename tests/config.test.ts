@@ -20,14 +20,14 @@ function withoutAiEnv<T>(fn: () => T): T {
   }
 }
 
-test("a saved Rofiant session is used as apiKey against rofiant.ca, when no provider key or env var is set", () => {
+test("a saved Rofiant session is used as apiKey against www.rofiant.ca, when no provider key or env var is set", () => {
   const dir = mkdtempSync(join(tmpdir(), "rofiant-config-"))
   const path = join(dir, "auth.json")
   saveAuth({ rofiant: { accessToken: "tok_abc", refreshToken: "ref_abc" } }, path)
 
   const config = withoutAiEnv(() => loadConfig(path))
   expect(config.apiKey).toBe("tok_abc")
-  expect(config.baseUrl).toBe("https://rofiant.ca/api/v1")
+  expect(config.baseUrl).toBe("https://www.rofiant.ca/api/v1")
 })
 
 test("a saved provider key wins over a saved Rofiant session", () => {

@@ -1,6 +1,6 @@
 {
   "name": "rofiant-code",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Terminal AI coding agent with reviewable tool permissions.",
   "private": true,
   "license": "GPL-3.0-only",

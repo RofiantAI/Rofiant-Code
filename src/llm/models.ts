@@ -9,12 +9,12 @@ interface OpenRouterModel {
   supported_parameters?: string[]
 }
 
-/** Only meaningful against OpenRouter's /models endpoint — returns null for any other provider or on failure. */
+/** The public catalog remains available when chat requests use the Rofiant proxy. */
 export async function listFreeModels(baseUrl: string): Promise<FreeModelInfo[] | null> {
-  if (!baseUrl.includes("openrouter.ai")) return null
+  const catalogUrl = baseUrl.includes("openrouter.ai") ? baseUrl : "https://openrouter.ai/api/v1"
 
   try {
-    const res = await fetch(`${baseUrl.replace(/\/$/, "")}/models`)
+    const res = await fetch(`${catalogUrl.replace(/\/$/, "")}/models`)
     if (!res.ok) return null
     const json = (await res.json()) as { data?: OpenRouterModel[] }
     return (json.data ?? [])

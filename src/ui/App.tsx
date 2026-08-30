@@ -1,7 +1,7 @@
 import { createEffect, createMemo, createSignal, onMount, Show } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { useKeyboard, useRenderer, useTerminalDimensions } from "@opentui/solid"
-import type { Config } from "../config"
+import { loadConfig, type Config } from "../config"
 import type { LLMProvider } from "../llm/types"
 import type { ToolDefinition } from "../llm/types"
 import type { Tool, ToolResult } from "../tools/types"
@@ -478,7 +478,7 @@ export function App(props: AppProps) {
               `Current model: ${model()}` +
                 (list
                   ? ""
-                  : "\n\n(The picker only works against OpenRouter — set AI_BASE_URL to openrouter.ai, or set one directly: /model <id>)"),
+                  : "\n\n(Couldn't reach OpenRouter's model list — set one directly: /model <id>)"),
             )
           }
         }
@@ -847,6 +847,9 @@ export function App(props: AppProps) {
           webUrl={props.config.webUrl}
           onClose={() => setProviderPicker(false)}
           onDone={(message) => {
+            const config = loadConfig()
+            Object.assign(props.config, config)
+            props.provider.configure?.(config.apiKey, config.baseUrl)
             setProviderPicker(false)
             info(message)
           }}

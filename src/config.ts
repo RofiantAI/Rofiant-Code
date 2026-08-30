@@ -18,7 +18,8 @@ export function loadConfig(authPath?: string): Config {
   const auth = authPath ? loadAuth(authPath) : loadAuth()
   const saved = auth.provider
   const rofiant = auth.rofiant
-  const webUrl = Bun.env.ROFIANT_WEB_URL ?? "https://rofiant.ca"
+  // Apex domain redirects to www and fetch drops Authorization across origins.
+  const webUrl = Bun.env.ROFIANT_WEB_URL ?? "https://www.rofiant.ca"
 
   return {
     apiKey: Bun.env.AI_API_KEY ?? saved?.apiKey ?? rofiant?.accessToken,

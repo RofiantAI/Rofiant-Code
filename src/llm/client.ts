@@ -39,6 +39,11 @@ export class OpenAICompatibleProvider implements LLMProvider {
     private baseUrl: string,
   ) {}
 
+  configure(apiKey: string | undefined, baseUrl: string): void {
+    this.apiKey = apiKey
+    this.baseUrl = baseUrl
+  }
+
   async *stream(request: AgentRequest): AsyncIterable<LLMEvent> {
     let res: Response
     try {

@@ -50,7 +50,7 @@ export AI_MODEL="z-ai/glm-5.2:free"
 rofiant
 ```
 
-You can also run `/login` inside the TUI to save an OpenAI API key locally, then restart Rofiant Code to use it.
+You can also run `/login` inside the TUI to sign in to Rofiant or save a third-party API key locally. Third-party providers are BYOK only; ChatGPT and Claude subscriptions are not used.
 
 > Rofiant Code currently uses the OpenAI-compatible `/chat/completions` protocol. Direct Anthropic Messages API support is not available yet.
 
@@ -130,7 +130,7 @@ $explore find where authentication state is stored
 | `/help` | Show commands and shortcuts |
 | `/new` | Start a new session |
 | `/model [id]` | View or change the model |
-| `/login` | Open the provider sign-in and API-key selector |
+| `/login` | Sign in to Rofiant or add a third-party API key |
 | `/compact` | Summarize and replace earlier history |
 | `/status` | Show project, Git, provider, and model information |
 | `/diff` | Show Git changes |
@@ -155,7 +155,7 @@ Rofiant Code reads configuration from environment variables. Copy [.env.example]
 | `AI_MODEL` | `z-ai/glm-5.2:free` | Model ID |
 | `AI_MAX_CONTEXT_TOKENS` | `100000` | Context trimming budget |
 | `ROFIANT_GITHUB_REPO` | `RofiantAI/Rofiant-Code` | Release update source |
-| `ROFIANT_WEB_URL` | `https://rofiant.ca` | Rofiant login URL |
+| `ROFIANT_WEB_URL` | `https://www.rofiant.ca` | Rofiant login URL |
 | `ROFIANT_DANGEROUSLY_SKIP_PERMISSIONS` | — | Set to `1` to bypass permission prompts |
 
 ### Local Data

@@ -11,7 +11,7 @@ export const SLASH_COMMANDS: SlashCommand[] = [
   { name: "/new", description: "Start a new session" },
   { name: "/clear", description: "Clear the visible chat (keeps conversation history)" },
   { name: "/model", description: "Show the current model and open a picker to switch — /model <id> to set directly" },
-  { name: "/login", description: "Sign in to a provider (Rofiant, OpenAI, Anthropic, ...)" },
+  { name: "/login", description: "Sign in to Rofiant or add a third-party API key" },
   { name: "/compact", description: "Summarize the conversation, replacing history with the summary" },
   { name: "/status", description: "Show project, git, provider and model info" },
   { name: "/diff", description: "Show git changes made this session" },

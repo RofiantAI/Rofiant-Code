@@ -40,5 +40,6 @@ export type LLMEvent =
   | { type: "error"; message: string }
 
 export interface LLMProvider {
+  configure?(apiKey: string | undefined, baseUrl: string): void
   stream(request: AgentRequest): AsyncIterable<LLMEvent>
 }

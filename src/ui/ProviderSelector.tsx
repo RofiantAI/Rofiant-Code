@@ -5,7 +5,7 @@ import { isPrintable } from "./SettingsModal"
 import { loginWithRofiant } from "../auth/login"
 import { loadAuth, saveAuth } from "../auth/store"
 
-type ProviderKind = "rofiant" | "apikey" | "unavailable" | "logout"
+type ProviderKind = "rofiant" | "apikey" | "logout"
 
 interface ProviderItem {
   id: string
@@ -16,10 +16,8 @@ interface ProviderItem {
 
 const PROVIDER_ITEMS: ProviderItem[] = [
   { id: "rofiant", label: "Rofiant", group: null, kind: "rofiant" },
-  { id: "codex", label: "Codex ChatGPT Pro/Plus", group: "Recommended", kind: "unavailable" },
-  { id: "import-claude", label: "Import from Claude Code", group: "Recommended", kind: "unavailable" },
-  { id: "openai", label: "OpenAI (ChatGPT Plus/Pro or API key)", group: "Popular", kind: "apikey" },
-  { id: "anthropic", label: "Anthropic (API key)", group: "Popular", kind: "apikey" },
+  { id: "openai", label: "OpenAI API key", group: "Bring your own key", kind: "apikey" },
+  { id: "anthropic", label: "Anthropic API key", group: "Bring your own key", kind: "apikey" },
 ]
 
 // This client only speaks the OpenAI-compatible /chat/completions wire format
@@ -54,9 +52,12 @@ export function ProviderSelector(props: ProviderSelectorProps) {
     const auth = loadAuth()
     if (id === "rofiant") delete auth.rofiant
     else delete auth.provider
-    saveAuth(auth)
+    if (!saveAuth(auth)) {
+      props.onDone("Could not save logout.")
+      return
+    }
     setActiveId(null)
-    props.onDone("Logged out. Restart to apply.")
+    props.onDone("Logged out.")
   }
 
   function selectItem(item: ProviderItem): void {
@@ -68,7 +69,10 @@ export function ProviderSelector(props: ProviderSelectorProps) {
       setPhase("logging-in")
       loginWithRofiant(props.webUrl).then(
         (tokens) => {
-          saveAuth({ ...loadAuth(), rofiant: tokens })
+          if (!saveAuth({ ...loadAuth(), rofiant: tokens })) {
+            props.onDone("Could not save Rofiant login.")
+            return
+          }
           setActiveId("rofiant")
           props.onDone("Signed in to Rofiant.")
         },
@@ -82,19 +86,21 @@ export function ProviderSelector(props: ProviderSelectorProps) {
       setPhase("key-entry")
       return
     }
-    props.onDone(`${item.label} isn't available yet.`)
   }
 
   function submitApiKey(): void {
     const name = apiKeyProvider()
     const key = apiKey().trim()
     if (!name || !key) return
-    saveAuth({ ...loadAuth(), provider: { name, apiKey: key, baseUrl: PROVIDER_BASE_URL[name] } })
+    if (!saveAuth({ ...loadAuth(), provider: { name, apiKey: key, baseUrl: PROVIDER_BASE_URL[name] } })) {
+      props.onDone("Could not save API key.")
+      return
+    }
     setActiveId(name)
     props.onDone(
       name === "anthropic"
-        ? "Anthropic key saved — restart to use it. Note: this build only speaks the OpenAI-compatible chat API, so it won't work until an Anthropic adapter exists."
-        : "OpenAI key saved — restart to use it.",
+        ? "Anthropic key saved. Note: this build only speaks the OpenAI-compatible chat API, so it won't work until an Anthropic adapter exists."
+        : "OpenAI key saved.",
     )
   }
 
