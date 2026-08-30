@@ -42,7 +42,7 @@ step "Installing dependencies"
 (cd "$stage_dir" && bun install --production --frozen-lockfile >/dev/null)
 
 step "Creating command"
-printf '#!/usr/bin/env bash\nexec bun --preload %q %q "$@"\n' \
+printf '#!/usr/bin/env bash\nexec bun --no-env-file --preload %q %q "$@"\n' \
   "$install_root/node_modules/@opentui/solid/scripts/preload.js" \
   "$install_root/src/index.ts" > "$launcher_tmp"
 chmod 755 "$launcher_tmp"

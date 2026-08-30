@@ -54,7 +54,7 @@ try {
   Write-Step "Creating command"
   $Preload = Join-Path $InstallRoot "node_modules\@opentui\solid\scripts\preload.js"
   $Entry = Join-Path $InstallRoot "src\index.ts"
-  @("@echo off", "bun --preload `"$Preload`" `"$Entry`" %*") |
+  @("@echo off", "bun --no-env-file --preload `"$Preload`" `"$Entry`" %*") |
     Set-Content (Join-Path $StageDir "rofiant.cmd") -Encoding ASCII
 
   New-Item -ItemType Directory -Path (Split-Path -Parent $InstallRoot), $BinDir -Force | Out-Null

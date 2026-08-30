@@ -12,18 +12,24 @@ export interface Config {
 }
 
 export function loadConfig(authPath?: string): Config {
-  // /login persists either an OpenAI/Anthropic API key (auth.provider) or a Rofiant
-  // session (auth.rofiant) — env vars still win when set, so a saved login never fights
-  // an explicit override. Provider key wins over a Rofiant session if somehow both are saved.
+  // Credentials and endpoints are pairs. Never combine a saved Rofiant token with an
+  // AI_BASE_URL inherited from the project: that leaks the token and breaks login.
   const auth = authPath ? loadAuth(authPath) : loadAuth()
   const saved = auth.provider
   const rofiant = auth.rofiant
+  const envApiKey = Bun.env.AI_API_KEY
   // Apex domain redirects to www and fetch drops Authorization across origins.
   const webUrl = Bun.env.ROFIANT_WEB_URL ?? "https://www.rofiant.ca"
+  const provider = envApiKey
+    ? { apiKey: envApiKey, baseUrl: Bun.env.AI_BASE_URL ?? "https://openrouter.ai/api/v1" }
+    : saved
+      ? { apiKey: saved.apiKey, baseUrl: saved.baseUrl }
+      : rofiant
+        ? { apiKey: rofiant.accessToken, baseUrl: new URL("/api/v1", webUrl).toString() }
+        : { apiKey: undefined, baseUrl: Bun.env.AI_BASE_URL ?? "https://openrouter.ai/api/v1" }
 
   return {
-    apiKey: Bun.env.AI_API_KEY ?? saved?.apiKey ?? rofiant?.accessToken,
-    baseUrl: Bun.env.AI_BASE_URL ?? saved?.baseUrl ?? (rofiant ? new URL("/api/v1", webUrl).toString() : "https://openrouter.ai/api/v1"),
+    ...provider,
     model: Bun.env.AI_MODEL ?? "z-ai/glm-5.2:free",
     maxContextTokens: Number(Bun.env.AI_MAX_CONTEXT_TOKENS ?? 100_000),
     githubRepo: Bun.env.ROFIANT_GITHUB_REPO ?? "RofiantAI/Rofiant-Code",
