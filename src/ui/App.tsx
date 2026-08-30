@@ -559,7 +559,28 @@ export function App(props: AppProps) {
       case "update": {
         const update = await checkUpdateStatus(props.config.githubRepo)
         if (update.status === "available") {
-          info(`Update available: v${update.current} → v${update.latest}\n${update.url}`)
+          info(`Updating v${update.current} → v${update.latest}…`)
+          setBusy(true)
+          try {
+            // Re-runs the same installer users would curl|bash by hand — it already
+            // does an atomic swap with backup/rollback, so this is safe mid-session.
+            const proc = Bun.spawn(
+              ["bash", "-c", `curl -fsSL https://raw.githubusercontent.com/${props.config.githubRepo}/main/install.sh | bash`],
+              { stdout: "pipe", stderr: "pipe" },
+            )
+            const [stdout, stderr, code] = await Promise.all([
+              new Response(proc.stdout).text(),
+              new Response(proc.stderr).text(),
+              proc.exited,
+            ])
+            if (code === 0) {
+              info(`Updated to v${update.latest}. Restart rofiant to use it.`)
+            } else {
+              errorEntry(`Update failed:\n${(stderr || stdout).trim().slice(-2000)}`)
+            }
+          } finally {
+            setBusy(false)
+          }
         } else if (update.status === "current") {
           info(`Rofiant Code v${update.current} is up to date.`)
         } else {

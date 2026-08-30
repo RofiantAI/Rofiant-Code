@@ -17,7 +17,7 @@ export const SLASH_COMMANDS: SlashCommand[] = [
   { name: "/diff", description: "Show git changes made this session" },
   { name: "/sessions", description: "List recent sessions for this project" },
   { name: "/usage", description: "Show token usage for this session and this project, by model" },
-  { name: "/update", description: "Check GitHub for a newer Rofiant Code release" },
+  { name: "/update", description: "Download and install the latest Rofiant Code release" },
   { name: "/skip-permissions", description: "Toggle auto-approving every tool call — asks to confirm before turning on" },
   { name: "/exit", description: "Exit" },
 ]
