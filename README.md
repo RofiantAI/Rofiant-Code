@@ -34,6 +34,18 @@ curl -fsSL https://raw.githubusercontent.com/RofiantAI/Rofiant-Code/main/install
 irm https://raw.githubusercontent.com/RofiantAI/Rofiant-Code/main/install.ps1 | iex
 ```
 
+### Uninstalling
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/RofiantAI/Rofiant-Code/main/uninstall.sh | bash
+```
+
+```powershell
+irm https://raw.githubusercontent.com/RofiantAI/Rofiant-Code/main/uninstall.ps1 | iex
+```
+
+Removes the app, saved sessions, login, and settings.
+
 Run Rofiant Code from the project you want to work on:
 
 ```bash

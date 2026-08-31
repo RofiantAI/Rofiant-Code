@@ -12,6 +12,7 @@ export interface AgentOptions {
   permissions: PermissionManager
   systemPrompt: string
   maxContextTokens: number
+  reasoningEffort?: string
 }
 
 interface PendingToolCall {
@@ -47,6 +48,10 @@ export class Agent {
 
   setModel(model: string): void {
     this.opts.model = model
+  }
+
+  setReasoningEffort(effort: string | undefined): void {
+    this.opts.reasoningEffort = effort
   }
 
   /** null = every tool available. A non-null set restricts both what's offered and what can run — e.g. plan mode. */
@@ -86,6 +91,7 @@ export class Agent {
           messages: trimmed,
           tools: this.activeToolDefinitions(),
           signal,
+          reasoningEffort: this.opts.reasoningEffort,
         })) {
           switch (event.type) {
             case "text-delta":
@@ -167,6 +173,7 @@ export class Agent {
       messages: trimHistory(request, this.opts.maxContextTokens),
       tools: [],
       signal,
+      reasoningEffort: this.opts.reasoningEffort,
     })) {
       if (event.type === "text-delta") {
         summary += event.text
@@ -196,6 +203,7 @@ export class Agent {
       messages: trimHistory(request, this.opts.maxContextTokens),
       tools: [],
       signal,
+      reasoningEffort: this.opts.reasoningEffort,
     })) {
       if (event.type === "text-delta") {
         text += event.text

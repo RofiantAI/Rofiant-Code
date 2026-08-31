@@ -16,8 +16,8 @@ import { workspaceRoot, toDisplayPath } from "../utils/paths"
 import * as git from "../utils/git"
 import { checkForUpdate, checkUpdateStatus } from "../utils/update-check"
 import pkg from "../../package.json"
-import { listFreeModels, type FreeModelInfo } from "../llm/models"
-import { theme } from "./theme"
+import { listModels, type FreeModelInfo } from "../llm/models"
+import { theme, setThemeMode } from "./theme"
 import { Chat } from "./Chat"
 import { Input } from "./Input"
 import { StatusBar } from "./StatusBar"
@@ -107,6 +107,7 @@ export function App(props: AppProps) {
     props.resumed ? replayMessages(props.session.messages) : [],
   )
   const [appSettings, setAppSettings] = createStore(loadSettings())
+  createEffect(() => setThemeMode(appSettings.theme))
   const [model, setModelSignal] = createSignal(props.session.model)
   const [suggestionsOpen, setSuggestionsOpen] = createSignal(false)
   const [settingsOpen, setSettingsOpen] = createSignal(false)
@@ -163,6 +164,7 @@ export function App(props: AppProps) {
       permissions,
       systemPrompt: props.systemPrompt,
       maxContextTokens: props.config.maxContextTokens,
+      reasoningEffort: appSettings.reasoningEffort === "none" ? undefined : appSettings.reasoningEffort,
     },
     props.session.messages,
   )
@@ -203,12 +205,6 @@ export function App(props: AppProps) {
   }
 
   function errorEntry(text: string): void {
-    // A 401 here means the saved Rofiant session (accessToken, ~1hr TTL) expired —
-    // there's no refresh flow, so every request would 401 forever without this.
-    if (text.includes("(401)") && loadAuth().rofiant) {
-      saveAuth({})
-      setLoginRequired(true)
-    }
     addEntry({ kind: "error", id: crypto.randomUUID(), text })
   }
 
@@ -298,11 +294,6 @@ export function App(props: AppProps) {
 
     if (text.startsWith("/")) {
       await runSlashCommand(text)
-      return
-    }
-
-    if (!props.config.apiKey) {
-      setLoginRequired(true)
       return
     }
 
@@ -470,7 +461,7 @@ export function App(props: AppProps) {
           break
         }
         {
-          const list = await listFreeModels(props.config.baseUrl)
+          const list = await listModels(props.config.baseUrl, props.config.apiKey)
           if (list && list.length > 0) {
             setModelPicker(list)
           } else {
@@ -478,11 +469,25 @@ export function App(props: AppProps) {
               `Current model: ${model()}` +
                 (list
                   ? ""
-                  : "\n\n(Couldn't reach OpenRouter's model list — set one directly: /model <id>)"),
+                  : "\n\n(Couldn't reach the provider's model list — set one directly: /model <id>)"),
             )
           }
         }
         break
+
+      case "effort": {
+        const levels = ["none", "low", "medium", "high", "xhigh"] as const
+        if (!arg) {
+          info(`Current reasoning effort: ${appSettings.reasoningEffort}`)
+        } else if (!(levels as readonly string[]).includes(arg)) {
+          errorEntry(`Invalid effort: ${arg}. Use one of: ${levels.join(", ")}`)
+        } else {
+          updateSetting({ reasoningEffort: arg as (typeof levels)[number] })
+          agent.setReasoningEffort(arg === "none" ? undefined : arg)
+          info(`Reasoning effort set to ${arg}`)
+        }
+        break
+      }
 
       case "login":
         setProviderPicker(true)
@@ -663,6 +668,13 @@ export function App(props: AppProps) {
       category: "Appearance",
       value: appSettings.visualMode === "vivid" ? "Vivid" : "Minimal",
       onSelect: () => updateSetting({ visualMode: appSettings.visualMode === "vivid" ? "minimal" : "vivid" }),
+    },
+    {
+      title: "Theme",
+      description: "Dark or light color palette",
+      category: "Appearance",
+      value: appSettings.theme === "light" ? "Light" : "Dark",
+      onSelect: () => updateSetting({ theme: appSettings.theme === "light" ? "dark" : "light" }),
     },
     {
       title: "Diff wrapping",
@@ -847,9 +859,11 @@ export function App(props: AppProps) {
           webUrl={props.config.webUrl}
           onClose={() => setProviderPicker(false)}
           onDone={(message) => {
+            const previousBaseUrl = props.config.baseUrl
             const config = loadConfig()
             Object.assign(props.config, config)
             props.provider.configure?.(config.apiKey, config.baseUrl)
+            if (config.baseUrl !== previousBaseUrl && config.model !== model()) selectModel(config.model)
             setProviderPicker(false)
             info(message)
           }}

@@ -6,7 +6,6 @@ const SAFE_PREFIXES = [
   "git diff",
   "git log",
   "git show",
-  "git branch",
   "ls",
   "cat",
   "pwd",
@@ -18,13 +17,15 @@ const SAFE_PREFIXES = [
   "ver",
   "grep",
   "rg",
-  "find",
   "wc",
   "head",
   "tail",
   "node --version",
   "bun --version",
 ]
+
+// Anything interpreted by the shell can turn an otherwise read-only prefix into a write.
+const SHELL_CONTROL = /[;&|<>`\n\r]|\$\(|\$\{/
 
 // Patterns that always require explicit permission, no matter what.
 const DANGEROUS_PATTERNS: RegExp[] = [
@@ -54,6 +55,8 @@ const DANGEROUS_PATTERNS: RegExp[] = [
 
 export function isSafeCommand(command: string): boolean {
   const trimmed = command.trim()
+  if (SHELL_CONTROL.test(trimmed) || /\bgit\s+(diff|log|show)\b.*\s--output(?:=|\s)/i.test(trimmed)) return false
+  if (/^git branch(?:\s+(?:--list|-l|--show-current|-a|-r|-v|-vv))*$/.test(trimmed)) return true
   return SAFE_PREFIXES.some((p) => trimmed === p || trimmed.startsWith(p + " "))
 }
 

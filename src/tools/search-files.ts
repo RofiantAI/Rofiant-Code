@@ -1,5 +1,5 @@
 import type { z } from "zod"
-import { readdirSync, readFileSync, statSync } from "node:fs"
+import { lstatSync, readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import { searchFilesSchema } from "./schemas"
 import type { Tool } from "./types"
@@ -53,10 +53,11 @@ function searchFallback(args: Args): string[] {
       const full = join(dir, entry)
       let stat
       try {
-        stat = statSync(full)
+        stat = lstatSync(full)
       } catch {
         continue
       }
+      if (stat.isSymbolicLink()) continue
       if (stat.isDirectory()) {
         walk(full)
         continue

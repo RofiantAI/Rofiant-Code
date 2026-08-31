@@ -1,7 +1,7 @@
 import { RenderableEvents, type KeyEvent, type TextareaRenderable } from "@opentui/core"
 import { createEffect, createMemo, createSignal, onCleanup, onMount, Show } from "solid-js"
 import { theme } from "./theme"
-import { matchSlashCommands } from "./commands"
+import { matchSlashCommands, slashCommands } from "./commands"
 import { matchFiles, matchSubagents } from "./mentions"
 import { CommandPopover, type PopoverMatch } from "./CommandPopover"
 import type { Skill } from "../skills"
@@ -101,6 +101,19 @@ export function Input(props: InputProps) {
     }
   })
   const clampedIndex = () => Math.min(selectedIndex(), Math.max(0, matches().length - 1))
+
+  // Once a command name is fully typed and no argument follows yet, show its
+  // arg hint right after the cursor — like a fish-shell inline suggestion.
+  const argHint = createMemo((): { col: number; hint: string } | null => {
+    const value = text()
+    if (value[0] !== "/" || cursorOffset() !== value.length) return null
+    const spaceIdx = value.indexOf(" ")
+    const cmdWord = spaceIdx === -1 ? value.slice(1) : value.slice(1, spaceIdx)
+    if (spaceIdx !== -1 && value.slice(spaceIdx + 1).trim() !== "") return null
+    const cmd = slashCommands(props.skills).find((c) => c.name.slice(1) === cmdWord)
+    if (!cmd?.argHint) return null
+    return { col: value.length, hint: cmd.argHint }
+  })
 
   createEffect(() => props.onCommandPaletteOpenChange?.(matches().length > 0))
 
@@ -217,6 +230,7 @@ export function Input(props: InputProps) {
       <box
         flexShrink={0}
         flexDirection="column"
+        position="relative"
         border={splash() ? ["left"] : true}
         borderColor={splash() ? theme.logo : theme.border}
         backgroundColor={splash() ? theme.splashInputBg : undefined}
@@ -225,6 +239,11 @@ export function Input(props: InputProps) {
         paddingTop={splash() ? 1 : 0}
         paddingBottom={splash() ? 1 : 0}
       >
+        {argHint() && (
+          <text position="absolute" top={0} left={argHint()!.col} fg={theme.dim}>
+            {` ${argHint()!.hint}`}
+          </text>
+        )}
         <textarea
           ref={ref}
           focused={!props.disabled}

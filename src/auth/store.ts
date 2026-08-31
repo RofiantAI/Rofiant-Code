@@ -5,6 +5,7 @@ import { dataDir } from "../utils/paths"
 
 const AuthSchema = z.object({
   rofiant: z.object({ accessToken: z.string(), refreshToken: z.string() }).optional(),
+  // Keep accepting old Anthropic entries so another valid credential in the file still loads.
   provider: z.object({ name: z.enum(["openai", "anthropic"]), apiKey: z.string(), baseUrl: z.string() }).optional(),
 })
 

@@ -15,6 +15,7 @@ export interface PermissionProps {
 
 export function Permission(props: PermissionProps) {
   const renderer = useRenderer()
+  const allowsAlways = () => !props.req.hideAlways && props.req.level !== "dangerous"
 
   // Hands the terminal to $EDITOR for the "[E] Edit" flow — the renderer owns
   // raw mode, so it must explicitly step aside while the child process runs.
@@ -50,7 +51,7 @@ export function Permission(props: PermissionProps) {
   useKeyboard((key) => {
     const name = key.name.toLowerCase()
     if (name === "y" || name === "return") props.onResolve({ decision: "allow" })
-    else if (name === "a" && !props.req.hideAlways) props.onResolve({ decision: "allow-always" })
+    else if (name === "a" && allowsAlways()) props.onResolve({ decision: "allow-always" })
     else if (name === "n" || name === "escape") props.onResolve({ decision: "deny" })
     else if (name === "e" && props.req.editableText !== undefined) void openEditor()
   })
@@ -77,7 +78,7 @@ export function Permission(props: PermissionProps) {
 
       <box marginTop={1}>
         <text fg={theme.dim}>
-          {props.req.hideAlways ? "[Y] Yes   [N] No" : `[Y] Yes   [A] ${alwaysLabel()}   [N] No`}
+          {allowsAlways() ? `[Y] Yes   [A] ${alwaysLabel()}   [N] No` : "[Y] Yes   [N] No"}
           {props.req.editableText !== undefined ? "   [E] Edit" : ""}
         </text>
       </box>

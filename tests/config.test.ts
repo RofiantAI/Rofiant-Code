@@ -10,13 +10,16 @@ import { saveAuth } from "../src/auth/store"
 function withoutAiEnv<T>(fn: () => T): T {
   const savedKey = Bun.env.AI_API_KEY
   const savedUrl = Bun.env.AI_BASE_URL
+  const savedModel = Bun.env.AI_MODEL
   delete Bun.env.AI_API_KEY
   delete Bun.env.AI_BASE_URL
+  delete Bun.env.AI_MODEL
   try {
     return fn()
   } finally {
     if (savedKey !== undefined) Bun.env.AI_API_KEY = savedKey
     if (savedUrl !== undefined) Bun.env.AI_BASE_URL = savedUrl
+    if (savedModel !== undefined) Bun.env.AI_MODEL = savedModel
   }
 }
 
@@ -65,6 +68,17 @@ test("a saved provider key wins over a saved Rofiant session", () => {
   const config = withoutAiEnv(() => loadConfig(path))
   expect(config.apiKey).toBe("sk-provider")
   expect(config.baseUrl).toBe("https://api.openai.com/v1")
+  expect(config.model).toBe("gpt-5-mini")
+})
+
+test("an old unsupported Anthropic entry is ignored", () => {
+  const dir = mkdtempSync(join(tmpdir(), "rofiant-config-"))
+  const path = join(dir, "auth.json")
+  saveAuth({ provider: { name: "anthropic", apiKey: "sk-ant", baseUrl: "https://api.anthropic.com/v1" } }, path)
+
+  const config = withoutAiEnv(() => loadConfig(path))
+  expect(config.apiKey).toBeUndefined()
+  expect(config.baseUrl).toBe("https://openrouter.ai/api/v1")
 })
 
 test("with no saved auth, falls back to OpenRouter with no apiKey", () => {

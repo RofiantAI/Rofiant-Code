@@ -39,10 +39,10 @@ export class PermissionManager {
 
   async check(req: PermissionRequest): Promise<PermissionResult> {
     if (req.level === "safe") return { approved: true }
-    if (this.alwaysAllowed.has(req.key)) return { approved: true }
+    if (req.level === "modify" && this.alwaysAllowed.has(req.key)) return { approved: true }
 
     const outcome = await this.handler(req)
-    if (outcome.decision === "allow-always") this.alwaysAllowed.add(req.key)
+    if (outcome.decision === "allow-always" && req.level === "modify") this.alwaysAllowed.add(req.key)
     if (outcome.decision === "deny") return { approved: false }
     if (outcome.decision === "edit") return { approved: true, text: outcome.text }
     return { approved: true }

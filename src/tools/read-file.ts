@@ -28,8 +28,17 @@ export const readFileTool: Tool<Args> = {
     return `Reading ${resolveWorkspacePath(args.path).relative || args.path}`
   },
 
-  async execute(args) {
+  async execute(args, ctx) {
     const resolved = resolveWorkspacePath(args.path)
+    const permission = await ctx.permissions.check({
+      toolName: "read_file",
+      level: this.permissionLevel(args),
+      summary: this.describe(args),
+      key: `read_file:${resolved.absolute}`,
+      hideAlways: !resolved.insideWorkspace,
+    })
+    if (!permission.approved) return { output: `User denied reading ${resolved.relative}.`, isError: true }
+
     const file = Bun.file(resolved.absolute)
     if (!(await file.exists())) {
       return { output: `File not found: ${resolved.relative}`, isError: true }

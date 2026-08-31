@@ -9,12 +9,10 @@ export function Message(props: { entry: NonToolEntry }) {
   return (
     <box flexDirection="column" marginBottom={1}>
       {e.kind === "user" && (
-        <box width="100%" backgroundColor={theme.splashInputBg} paddingLeft={1} paddingRight={1}>
-          <text>
-            <span style={{ fg: theme.dim }}>{"› "}</span>
-            <span style={{ fg: theme.text }}>{e.text}</span>
-          </text>
-        </box>
+        <text>
+          <span style={{ fg: theme.dim }}>{"› "}</span>
+          <span style={{ fg: theme.text }}>{e.text}</span>
+        </text>
       )}
       {e.kind === "assistant" && e.text.length > 0 && (
         <box flexDirection="column" marginTop={1}>

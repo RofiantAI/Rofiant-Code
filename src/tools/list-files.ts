@@ -1,5 +1,5 @@
 import type { z } from "zod"
-import { readdirSync, statSync } from "node:fs"
+import { lstatSync, readdirSync, statSync } from "node:fs"
 import { join } from "node:path"
 import { listFilesSchema } from "./schemas"
 import type { Tool } from "./types"
@@ -22,7 +22,7 @@ function walk(dir: string, depth: number, showIgnored: boolean, prefix: string, 
     const full = join(dir, entry)
     let isDir = false
     try {
-      isDir = statSync(full).isDirectory()
+      isDir = lstatSync(full).isDirectory()
     } catch {
       continue
     }
@@ -46,8 +46,17 @@ export const listFilesTool: Tool<Args> = {
     return `Listing ${resolveWorkspacePath(args.path).relative || "."}`
   },
 
-  async execute(args) {
+  async execute(args, ctx) {
     const resolved = resolveWorkspacePath(args.path)
+    const permission = await ctx.permissions.check({
+      toolName: "list_files",
+      level: this.permissionLevel(args),
+      summary: this.describe(args),
+      key: `list_files:${resolved.absolute}`,
+      hideAlways: !resolved.insideWorkspace,
+    })
+    if (!permission.approved) return { output: `User denied listing ${resolved.relative}.`, isError: true }
+
     try {
       if (!statSync(resolved.absolute).isDirectory()) {
         return { output: `Not a directory: ${resolved.relative}`, isError: true }

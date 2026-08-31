@@ -1,8 +1,22 @@
 import { homedir } from "node:os"
-import { isAbsolute, join, normalize, relative, resolve, sep } from "node:path"
+import { existsSync, realpathSync } from "node:fs"
+import { basename, dirname, isAbsolute, join, normalize, relative, resolve, sep } from "node:path"
 
 /** The directory the CLI was launched from. Fixed for the process lifetime. */
 export const workspaceRoot = process.cwd()
+const realWorkspaceRoot = realpathSync(workspaceRoot)
+
+function realTarget(path: string): string {
+  let existing = path
+  const missing: string[] = []
+  while (!existsSync(existing)) {
+    const parent = dirname(existing)
+    if (parent === existing) return path
+    missing.unshift(basename(existing))
+    existing = parent
+  }
+  return resolve(realpathSync(existing), ...missing)
+}
 
 /** User data dir for sessions/logs, following XDG on linux/mac, %APPDATA% on windows. */
 export function dataDir(): string {
@@ -23,7 +37,8 @@ export interface ResolvedPath {
 export function resolveWorkspacePath(input: string): ResolvedPath {
   const absolute = isAbsolute(input) ? normalize(input) : resolve(workspaceRoot, input)
   const rel = relative(workspaceRoot, absolute)
-  const insideWorkspace = rel === "" || (!rel.startsWith("..") && !isAbsolute(rel))
+  const realRel = relative(realWorkspaceRoot, realTarget(absolute))
+  const insideWorkspace = realRel === "" || (!realRel.startsWith("..") && !isAbsolute(realRel))
   return { absolute, relative: rel.split(sep).join("/"), insideWorkspace }
 }
 

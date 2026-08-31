@@ -58,6 +58,7 @@ export class OpenAICompatibleProvider implements LLMProvider {
           messages: request.messages.map(toOpenAIMessage),
           stream: true,
           stream_options: { include_usage: true },
+          ...(request.reasoningEffort ? { reasoning_effort: request.reasoningEffort } : {}),
           ...(request.tools.length > 0
             ? {
                 tools: request.tools.map((t) => ({

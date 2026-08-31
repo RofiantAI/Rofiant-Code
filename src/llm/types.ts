@@ -28,6 +28,7 @@ export interface AgentRequest {
   messages: LLMMessage[]
   tools: ToolDefinition[]
   signal?: AbortSignal
+  reasoningEffort?: string
 }
 
 export type LLMEvent =
