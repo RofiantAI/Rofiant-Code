@@ -205,6 +205,12 @@ export function App(props: AppProps) {
   }
 
   function errorEntry(text: string): void {
+    // A 401 here means the saved Rofiant session (accessToken, ~1hr TTL) expired —
+    // there's no refresh flow, so every request would 401 forever without this.
+    if (text.includes("(401)") && loadAuth().rofiant) {
+      saveAuth({})
+      setLoginRequired(true)
+    }
     addEntry({ kind: "error", id: crypto.randomUUID(), text })
   }
 
