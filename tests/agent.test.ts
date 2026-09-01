@@ -103,6 +103,31 @@ describe("Agent.compact", () => {
   })
 })
 
+describe("Agent.send empty response", () => {
+  test("surfaces an error when the model returns no text and no tool calls", async () => {
+    const provider: LLMProvider = {
+      async *stream(): AsyncIterable<LLMEvent> {
+        yield { type: "done", finishReason: "stop" }
+      },
+    }
+    const agent = new Agent({
+      provider,
+      model: "m",
+      tools: new Map(),
+      toolDefinitions: [],
+      permissions: new PermissionManager(async () => ({ decision: "allow" })),
+      systemPrompt: "sys",
+      maxContextTokens: 100_000,
+    })
+
+    const events = []
+    for await (const e of agent.send("hi", new AbortController().signal)) events.push(e)
+
+    expect(events.some((e) => e.type === "error")).toBe(true)
+    expect(events.some((e) => e.type === "turn-end")).toBe(true)
+  })
+})
+
 describe("Agent.send prompt context", () => {
   test("sends injected instructions without persisting them as user text", async () => {
     let request: AgentRequest | undefined

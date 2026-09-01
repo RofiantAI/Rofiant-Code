@@ -143,6 +143,10 @@ export class Agent {
       })
 
       if (toolCalls.length === 0) {
+        // A model can burn its whole output budget on hidden reasoning tokens and
+        // return no visible text and no tool calls — that's not an error upstream
+        // (finish_reason is often "stop"), so it would otherwise render as nothing.
+        if (!assistantText) yield { type: "error", message: "Model returned an empty response. Try again." }
         yield { type: "turn-end" }
         return
       }

@@ -1,6 +1,6 @@
 {
   "name": "rofiant-code",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Terminal AI coding agent with reviewable tool permissions.",
   "private": true,
   "license": "GPL-3.0-only",
@@ -15,7 +15,7 @@
   "scripts": {
     "start": "bun run src/index.ts",
     "dev": "bun run src/index.ts",
-    "test": "bun test",
+    "test": "bun test tests",
     "check": "bun run typecheck && bun test",
     "typecheck": "tsc --noEmit"
   },
