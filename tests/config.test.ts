@@ -78,12 +78,12 @@ test("an old unsupported Anthropic entry is ignored", () => {
 
   const config = withoutAiEnv(() => loadConfig(path))
   expect(config.apiKey).toBeUndefined()
-  expect(config.baseUrl).toBe("https://openrouter.ai/api/v1")
+  expect(config.baseUrl).toBe("https://oqqyqbftzesizwhbnspg.supabase.co/functions/v1/ai-proxy")
 })
 
-test("with no saved auth, falls back to OpenRouter with no apiKey", () => {
+test("with no saved auth, falls back to the public free-model proxy with no apiKey", () => {
   const path = join(mkdtempSync(join(tmpdir(), "rofiant-config-")), "missing.json")
   const config = withoutAiEnv(() => loadConfig(path))
   expect(config.apiKey).toBeUndefined()
-  expect(config.baseUrl).toBe("https://openrouter.ai/api/v1")
+  expect(config.baseUrl).toBe("https://oqqyqbftzesizwhbnspg.supabase.co/functions/v1/ai-proxy")
 })

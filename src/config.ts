@@ -28,7 +28,7 @@ export function loadConfig(authPath?: string): Config {
       ? { apiKey: saved.apiKey, baseUrl: saved.baseUrl }
       : rofiant
         ? { apiKey: rofiant.accessToken, baseUrl: new URL("/api/v1", webUrl).toString() }
-        : { apiKey: undefined, baseUrl: Bun.env.AI_BASE_URL ?? "https://openrouter.ai/api/v1" }
+        : { apiKey: undefined, baseUrl: Bun.env.AI_BASE_URL ?? "https://oqqyqbftzesizwhbnspg.supabase.co/functions/v1/ai-proxy" }
 
   return {
     ...provider,
