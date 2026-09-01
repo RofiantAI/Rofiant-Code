@@ -14,7 +14,11 @@ interface OpenRouterModel {
 export async function listModels(baseUrl: string, apiKey?: string): Promise<FreeModelInfo[] | null> {
   try {
     const hostname = new URL(baseUrl).hostname
-    const openRouterCatalog = hostname === "openrouter.ai" || hostname === "rofiant.ca" || hostname.endsWith(".rofiant.ca")
+    const openRouterCatalog =
+      hostname === "openrouter.ai" ||
+      hostname === "rofiant.ca" ||
+      hostname.endsWith(".rofiant.ca") ||
+      hostname.endsWith(".supabase.co")
     const catalogUrl = openRouterCatalog && hostname !== "openrouter.ai" ? "https://openrouter.ai/api/v1" : baseUrl
     const res = await fetch(`${catalogUrl.replace(/\/$/, "")}/models`, {
       headers: apiKey && catalogUrl === baseUrl ? { authorization: `Bearer ${apiKey}` } : undefined,

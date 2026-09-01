@@ -35,3 +35,19 @@ test("Rofiant uses OpenRouter's public free-model catalog", async () => {
     globalThis.fetch = originalFetch
   }
 })
+
+test("the public Supabase ai-proxy default also uses OpenRouter's catalog", async () => {
+  const originalFetch = globalThis.fetch
+  let url = ""
+  globalThis.fetch = async (input) => {
+    url = String(input)
+    return Response.json({ data: [{ id: "paid/model" }, { id: "free/model:free" }] })
+  }
+  try {
+    const models = await listModels("https://oqqyqbftzesizwhbnspg.supabase.co/functions/v1/ai-proxy", undefined)
+    expect(url).toBe("https://openrouter.ai/api/v1/models")
+    expect(models?.map((model) => model.id)).toEqual(["free/model:free"])
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
